@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wirebarley.exchange.bean.BaseResult;
-import com.wirebarley.exchange.common.ErrorEnum;
-import com.wirebarley.exchange.exception.ExchangeException;
+import com.wirebarley.exchange.common.ErrorCode;
 import com.wirebarley.exchange.model.ExInputDTO;
 import com.wirebarley.exchange.service.ExchangeRateService;
 import com.wirebarley.exchange.util.UtiltLib;
@@ -41,18 +40,14 @@ public class ExchangeRateAPIController {
 	 * 
 	 * @param receiveCountry
 	 * @return
+	 * @throws ExchangeExceptionOri
 	 */
 	@GetMapping("/exchangerates")
-	public ResponseEntity<BaseResult> getExchangeRate(@RequestParam(name = "receiveCountry") String receiveCountry) throws ExchangeException {
+	public ResponseEntity<BaseResult> getExchangeRate(@RequestParam(name = "receiveCountry") String receiveCountry) {
 		BaseResult result = new BaseResult();
-		try {
-			Double exchangeRate = exchangeRateService.getExchangeRate(receiveCountry);
-			// 환율 정보 validation
-			result = this.rateCheck(result,exchangeRate);
-			result.setResultData(utiltLib.format(exchangeRate));
-		} catch (Exception e) {
-			throw ExchangeException.setException(ErrorEnum.NONE.getCode(), ErrorEnum.NONE.getDesc());
-		}
+		Double exchangeRate = exchangeRateService.getExchangeRate(receiveCountry);
+		result = this.rateCheck(result, exchangeRate);
+		result.setResultData(utiltLib.format(exchangeRate));
 		return ResponseEntity.status(HttpStatus.OK).body(result);
 	}
 
@@ -61,36 +56,30 @@ public class ExchangeRateAPIController {
 	 * 
 	 * @param sendamount
 	 * @return
-	 * @throws ExchangeException
+	 * @throws ExchangeExceptionOri
 	 */
 	@PostMapping("/sendamount")
-	public ResponseEntity<BaseResult> getSendAmount(@Valid @RequestBody ExInputDTO exInputDTO) throws ExchangeException {
+	public ResponseEntity<BaseResult> getSendAmount(@Valid @RequestBody ExInputDTO exInputDTO) throws Exception {
 		BaseResult result = new BaseResult();
-		try {
-			Double exchangeRate = exchangeRateService.getExchangeRate(exInputDTO.getReceiveCountry());
-			// 환율 정보 validation
-			result = this.rateCheck(result,exchangeRate);
-			Double sendAmount = (exchangeRate * exInputDTO.getSendAmount());
-			String formatSendAmount = utiltLib.format(sendAmount);
-			result.setResultData(formatSendAmount);
-		} catch (Exception e) {
-			throw ExchangeException.setException(ErrorEnum.NONE.getCode(), ErrorEnum.NONE.getDesc());
-		}
+		Double exchangeRate = exchangeRateService.getExchangeRate(exInputDTO.getReceiveCountry());
+		Double sendAmount = (exchangeRate * exInputDTO.getSendAmount());
+		String formatSendAmount = utiltLib.format(sendAmount);
+		result.setResultData(formatSendAmount);
 		return ResponseEntity.status(HttpStatus.OK).body(result);
 	}
-	
+
 	/**
 	 * 화율 정보 체크
+	 * 
 	 * @param result
 	 * @param exchangeRate
 	 * @return
+	 * @throws ExchangeExceptionOri
 	 */
 	private BaseResult rateCheck(BaseResult result, Double exchangeRate) {
 		if (exchangeRate <= 0) {
-			result.setResult(false);
-			result.setResultMessage("환율 정보 오류가 발생 했습니다.");
+			result.setErrorCode(ErrorCode.RATE_ERROR.getErrorCode(),ErrorCode.RATE_ERROR.getMessage());
 		}
 		return result;
 	}
-
 }

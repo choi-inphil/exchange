@@ -1,6 +1,6 @@
 package com.wirebarley.exchange.bean;
 
-import com.wirebarley.exchange.common.ErrorEnum;
+import com.wirebarley.exchange.common.BasicEnum;
 
 public class BaseResult {
 	
@@ -9,17 +9,17 @@ public class BaseResult {
 	 */
 	private boolean result = true;
 	
-	private String resultStatus = ErrorEnum.SUCCESS.getDesc();
+	private int resultStatus = BasicEnum.SUCCESS.getStatus();
     
 	/**
 	 * 에러 코드
 	 */
-	private int resultCode = ErrorEnum.OK.getCode();
+	private String resultCode = BasicEnum.OK.getCode();
 	
 	/**
 	 * 에러 코드 성명
 	 */
-    private String resultMessage =  ErrorEnum.OK.getDesc();
+    private String resultMessage =  BasicEnum.OK.getMessage();
     
 	/**
 	 * 결과 Data
@@ -51,35 +51,35 @@ public class BaseResult {
 	public void setResult(boolean result) {
 		this.result = result;
 		if(result) {
-			this.resultCode = ErrorEnum.SUCCESS.getCode();
-			this.resultMessage = ErrorEnum.SUCCESS.getDesc();
+			this.resultCode = BasicEnum.SUCCESS.getCode();
+			this.resultMessage = BasicEnum.SUCCESS.getMessage();
 		}
 	}
 	
-	public void setErrorCode(ErrorEnum errorEnum) {
+	public void setErrorCode(BasicEnum errorEnum) {
 		this.result = false;
 		this.resultCode = errorEnum.getCode();
-		this.errorMsg = errorEnum.getDesc();
+		this.errorMsg = errorEnum.getMessage();
 	}
 
-	public void setErrorCode(int errorCode, String errMessge) {
+	public void setErrorCode(String errorCode, String errMessge) {
 		this.result = false;
 		this.resultCode = errorCode;
 		this.resultMessage = errMessge;
 	}
 	
-    public String getResultStatus() {
+    public int getResultStatus() {
 		return resultStatus;
 	}
-	public void setResultStatus(String resultStatus) {
+	public void setResultStatus(int resultStatus) {
 		this.resultStatus = resultStatus;
 	}
 	
-	public int getResultCode() {
+	public String getResultCode() {
         return resultCode;
     }
 
-    public BaseResult setResultCode(int resultCode) {
+    public BaseResult setResultCode(String resultCode) {
         this.resultCode = resultCode;
         return this;
     }
